@@ -1,62 +1,40 @@
 import Redis from "ioredis";
 
-const redis = new Redis(process.env.REDIS_URL); // cukup ini, jangan await top-level
+const redis = new Redis(process.env.REDIS_URL);
 
-export const config = {
-  runtime: "nodejs"
-};
+export const config = { runtime: "nodejs" };
 
 export default async function handler(req, res) {
-  // ===== CORS (HARUS PALING ATAS) =====
-  res.setHeader("Access-Control-Allow-Origin", "https://zhuruo.my.id");
+  // CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  // ===================================
+  if (req.method === "OPTIONS") return res.status(200).end();
+
+  const path = (req.query.path || "/").replace(/\/$/, "");
+  const key = `comments:${path}`;
 
   try {
-    const path = req.query.path || "/";
-
-    // ===== GET =====
     if (req.method === "GET") {
-      const data = await redis.get(path);
-      const comments = data ? JSON.parse(data) : [];
-      return res.status(200).json({ ok: true, comments });
+      const raw = await redis.lrange(key, 0, -1); // ambil semua komentar
+      const comments = raw.map(JSON.parse);
+      return res.json(comments);
     }
 
-    // ===== POST =====
-    fetch('/api/comments?path=/projects/comment-sections/', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name: 'Doni', message: 'Test' })
-});
+    if (req.method === "POST") {
+      const { name, message } = req.body || {};
+      if (!name || !message) return res.status(400).json({ ok: false });
 
-
-      if (!name || !message) {
-        return res.status(400).json({ ok: false, error: "Name & message required" });
-      }
-
-      const data = await redis.get(path);
-      const comments = data ? JSON.parse(data) : [];
-
-      comments.push({
-        name,
-        message,
-        time: Date.now()
-      });
-
-      await redis.set(path, JSON.stringify(comments));
-
-      return res.status(200).json({ ok: true });
+      const comment = { name, message, time: Date.now() };
+      await redis.rpush(key, JSON.stringify(comment)); // simpan komentar
+      return res.json({ ok: true });
     }
 
-    return res.status(405).end();
+    res.status(405).end();
 
   } catch (err) {
-    console.error("API ERROR:", err);
-    return res.status(500).json({ ok: false });
+    console.error(err);
+    res.status(500).json({ ok: false });
   }
 }
