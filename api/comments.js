@@ -1,5 +1,10 @@
+import Redis from "ioredis";
 
+const redis = new Redis(process.env.REDIS_URL);
 
+await redis.set("test", "connected");
+const value = await redis.get("test");
+console.log(value); // "connected"
 
 export const config = {
   runtime: "nodejs"
