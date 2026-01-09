@@ -28,10 +28,12 @@ export default async function handler(req, res) {
     }
 
     // ===== POST =====
-    if (req.method === "POST") {
-      const body = req.body || {};
-      const name = body.name?.trim();
-      const message = body.message?.trim();
+    fetch('/api/comments?path=/projects/comment-sections/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: 'Doni', message: 'Test' })
+});
+
 
       if (!name || !message) {
         return res.status(400).json({ ok: false, error: "Name & message required" });
