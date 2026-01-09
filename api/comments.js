@@ -1,24 +1,35 @@
-let comments = [];
+export default async function handler(req, res) {
 
-export default function handler(req, res) {
-  if (req.method === 'GET') {
-    return res.status(200).json(comments);
+  // ===== CORS FIX =====
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Preflight request (WAJIB)
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  // ====================
+
+  const path = req.query.path || "/";
+
+  if (req.method === "GET") {
+    // contoh dummy dulu
+    return res.status(200).json([
+      { name: "Tester", message: "Komentar berhasil dimuat." }
+    ]);
   }
 
-  if (req.method === 'POST') {
+  if (req.method === "POST") {
     const { name, message } = req.body;
-    if (!name || !message) {
-      return res.status(400).json({ error: 'Nama & pesan wajib' });
-    }
 
-    comments.push({
+    return res.status(200).json({
+      success: true,
       name,
       message,
-      date: new Date().toISOString()
+      path
     });
-
-    return res.status(200).json({ success: true, comments });
   }
 
-  res.status(405).json({ error: 'Method not allowed' });
+  res.status(405).end();
 }
