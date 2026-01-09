@@ -1,6 +1,4 @@
-import Redis from "ioredis";
 
-const redis = new Redis(process.env.redis://default:BQLUXD6JSENnfIbML7HfAs7PWSEwHdAw@redis-18387.c275.us-east-1-4.ec2.cloud.redislabs.com:18387);
 
 
 export const config = {
