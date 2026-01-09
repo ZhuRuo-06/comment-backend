@@ -1,20 +1,29 @@
-// import Redis from "ioredis";
-
-// const redis = new Redis(process.env.REDIS_URL);
-
-// await redis.set("test", "connected");
-// const value = await redis.get("test");
-// console.log(value); // "connected"
+import fs from "fs";
+import path from "path";
 
 export const config = {
   runtime: "nodejs"
 };
 
+// File JSON untuk nyimpen comment
+const DATA_FILE = path.join(process.cwd(), "comments.json");
 
-let store = {};
+// Fungsi bantu: baca JSON
+function readComments() {
+  try {
+    const data = fs.readFileSync(DATA_FILE, "utf-8");
+    return JSON.parse(data);
+  } catch (err) {
+    return {}; // kalau file belum ada atau corrupt
+  }
+}
+
+// Fungsi bantu: tulis JSON
+function writeComments(store) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(store, null, 2), "utf-8");
+}
 
 export default async function handler(req, res) {
-
   // ===== CORS (HARUS PALING ATAS) =====
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -26,22 +35,22 @@ export default async function handler(req, res) {
   // ===================================
 
   try {
-    const path = req.query.path || "/";
+    const pathQuery = req.query.path || "/";
+    const store = readComments();
 
-    if (!store[path]) store[path] = [];
+    if (!store[pathQuery]) store[pathQuery] = [];
 
     // ===== GET =====
     if (req.method === "GET") {
       return res.status(200).json({
         ok: true,
-        comments: store[path]
+        comments: store[pathQuery]
       });
     }
 
     // ===== POST =====
     if (req.method === "POST") {
       const body = req.body || {};
-
       const name = body.name;
       const message = body.message;
 
@@ -49,11 +58,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false });
       }
 
-      store[path].push({
+      store[pathQuery].push({
         name,
         message,
         time: Date.now()
       });
+
+      writeComments(store);
 
       return res.status(200).json({ ok: true });
     }
