@@ -1,6 +1,6 @@
 let comments = [];
 
-module.exports = (req, res) => {
+export default function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json(comments);
   }
@@ -17,8 +17,8 @@ module.exports = (req, res) => {
       date: new Date().toISOString()
     });
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true, comments });
   }
 
   res.status(405).json({ error: 'Method not allowed' });
-};
+}
