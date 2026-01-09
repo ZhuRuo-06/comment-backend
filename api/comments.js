@@ -1,6 +1,6 @@
 import Redis from "ioredis";
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_URL); // cukup ini, jangan await top-level
 
 export const config = {
   runtime: "nodejs"
@@ -8,7 +8,7 @@ export const config = {
 
 export default async function handler(req, res) {
   // ===== CORS (HARUS PALING ATAS) =====
-  res.setHeader("Access-Control-Allow-Origin", "https://zhuruo.my.id"); // ganti sesuai domain
+  res.setHeader("Access-Control-Allow-Origin", "https://zhuruo.my.id");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -37,18 +37,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: "Name & message required" });
       }
 
-      // Ambil comment lama dari Redis
       const data = await redis.get(path);
       const comments = data ? JSON.parse(data) : [];
 
-      // Tambahkan comment baru
       comments.push({
         name,
         message,
         time: Date.now()
       });
 
-      // Simpan lagi ke Redis
       await redis.set(path, JSON.stringify(comments));
 
       return res.status(200).json({ ok: true });
