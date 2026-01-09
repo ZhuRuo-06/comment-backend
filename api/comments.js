@@ -1,3 +1,8 @@
+export const config = {
+  runtime: "nodejs"
+};
+
+
 let store = {};
 
 export default async function handler(req, res) {
