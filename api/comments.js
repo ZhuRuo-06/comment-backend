@@ -6,9 +6,9 @@
 // const value = await redis.get("test");
 // console.log(value); // "connected"
 
-// export const config = {
-//   runtime: "nodejs"
-// };
+export const config = {
+  runtime: "nodejs"
+};
 
 
 let store = {};
