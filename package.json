@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "redis": "^4.10.0"
+    "redis": "^5.10.0"
   },
   "scripts": {
     "start": "vercel dev"
