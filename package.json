@@ -1,6 +1,11 @@
 {
   "name": "comment-backend",
   "version": "1.0.0",
-  "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "redis": "^4.10.0"
+  },
+  "scripts": {
+    "start": "vercel dev"
+  }
 }
